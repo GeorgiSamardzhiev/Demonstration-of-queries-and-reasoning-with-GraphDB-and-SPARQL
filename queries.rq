@@ -58,7 +58,7 @@ WHERE {
 
 
 
-#Here we are searching on more properties
+# Here we are searching on more properties
 
 SELECT * 
 WHERE { 
@@ -89,7 +89,7 @@ WHERE {
 
 SELECT ?maker (count(distinct ?wine) as ?wineCount)
 WHERE {
- 	?wine  vin:hasFlavor vin:Moderate.
+    ?wine  vin:hasFlavor vin:Moderate.
     FILTER NOT EXISTS {
         ?wine vin:hasVintageYear ?year
     }
@@ -106,9 +106,9 @@ ORDER BY DESC(?wineCount)
 
 SELECT DISTINCT ?maker ?region
 WHERE {
-	?wine vin:hasMaker ?maker.
+    ?wine vin:hasMaker ?maker.
     ?wine vin:locatedIn ?region.
-     {
+    {
         SELECT ?maker (count(distinct ?w) as ?wineCount)
         WHERE { 
             ?w vin:hasMaker ?maker.
@@ -121,13 +121,13 @@ WHERE {
 
 
 
-#This is an example with UNION
+# This is an example with UNION
 
 SELECT * 
 WHERE { 
     {
         ?w vin:hasMaker ?maker .
-    	FILTER(?maker IN (vin:WhitehallLane, vin:ChateauDeMeursault)).
+        FILTER(?maker IN (vin:WhitehallLane, vin:ChateauDeMeursault)).
         ?w vin:hasFlavor ?f .  
     }
     UNION
@@ -160,7 +160,7 @@ WHERE {
 
 SELECT ?information
 WHERE {
-	?wine a ?wineType.
+    ?wine a ?wineType.
     FILTER(?wineType in (vin:Zinfandel, vin:Merlot, vin:CabernetFranc, vin:Chardonnay, vin:CabernetSauvignon))
     ?wine vin:hasFlavor ?flavor.
     ?wine vin:hasBody ?body.
