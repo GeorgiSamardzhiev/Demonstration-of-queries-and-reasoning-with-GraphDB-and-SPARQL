@@ -4,9 +4,9 @@
 
 The RDF contains 2519 statements. From them 1839 are explicit and 680 are inferred. Relations of the classes are described(figure 1) and the class hierarchy is shown(figure 2). Some of the object properties of the ontology are *vin:hasMaker*, *vin:hasWineDescriptor*, *vin:hasBody*, *vin:hasFlavor*, *vin:hasMaker*, *vin:locatedIn*, *vin:hasDrink*, *vin:hasFood*, *vin:madeFromFruit*.
 
-![Relations](figures/figure1.png)  |  ![Heirarchy](figures/figure2.png)
+![Relations](figures/figure1.png)  |  ![Hierarchy](figures/figure2.png)
 :-------------------------:|:-------------------------:
-Figure 1 - Relations         |  Figure 2 - Heirarchy
+Figure 1 - Relations         |  Figure 2 - Hierarchy
 
 The ontology contains 50 classes. The biggest is food:Grape it has sub class :WineGrape. Other classes are *:Winery*, *:Region*, *:food:PotableLiquid*, *:WineDescripto*r. *:Wine* is subclass of *:food:PotableLiqud*, it has other subclasses(figure 3). Another commonly used class in this project is *:WineDescriptor*. It has subclasses *:WineColor*, *:WineTaste*, where *:WineTaste* has subclasses for *:WineFlavor*, *:WineSugar* and *:WineBody*(figure 4).
 
@@ -21,7 +21,7 @@ With the execution of the developed queries more about the ontology is learned.
 |:--:|
 |Figure 5 - Visual Graph|
 
-Visual graph for FreachRegion is presented in figure 5. Information about StEmilionRegion is queried in one of the queries from the last part. It is located in French and Bordeaux Regions. This is view with inferred statements. GraphDB’s visual graph proved very convinient for exploring relations between classes and properties. I have used it while developing big portion of the queries. The figure here is one for giving idea what dows the visual graph look like after searching for specific class.
+Visual graph for FreachRegion is presented in figure 5. Information about StEmilionRegion is queried in one of the queries from the last part. It is located in French and Bordeaux Regions. This is view with inferred statements. GraphDB’s visual graph proved very convinient for exploring relations between classes and properties. I have used it while developing big portion of the queries. The figure here is one for giving idea what does the visual graph look like after searching for specific class.
 
 ## Algorithms and methods in GraphDB
 
@@ -39,4 +39,4 @@ GraphDB can be configured via ruleset – sets of axiomatic triples, consistency
 
 ## Queries
 
-There are 16 queries. For each query there is a coment showing what is interesting about it.
+There are 16 queries. For each query there is a comment showing what is interesting about it.
