@@ -1,0 +1,231 @@
+PREFIX vin: <http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#>
+
+
+
+# Let's describe Wine class
+
+DESCRIBE vin:Wine
+
+
+
+# Wine properties
+
+SELECT DISTINCT ?wine ?property
+WHERE { 
+    ?wine a vin:Wine .
+    ?wine ?property ?value .
+}
+
+
+
+# Let's see what we have about regions
+
+DESCRIBE vin:Region
+
+
+
+# More information about region properties 
+
+SELECT DISTINCT ?region ?property
+WHERE { 
+    ?region a vin:Region .
+    ?region ?property ?value .
+}
+
+
+
+# This tells me more about locatedIn property
+
+SELECT DISTINCT ?property ?value 
+WHERE { 
+    vin:locatedIn ?property ?value .
+}
+
+
+
+# Thie are statements in the ontology 
+# (StEmilionRegion locatedIn BordeauxRegion)
+# (BordeauxRegion locatedIn FrenchRegion)
+# There isn't (StEmilionRegion locatedIn FrenchRegion) statement
+# But with reasoning there is additional row returned with that statement. This is transitivity exmaple
+
+SELECT DISTINCT ?region ?property ?value 
+WHERE { 
+    ?region a vin:Region .
+    ?region ?property ?value .
+    FILTER(?region = vin:StEmilionRegion)
+}
+
+
+
+#Here we are searching on more properties
+
+SELECT * 
+WHERE { 
+    ?wine vin:hasFlavor vin:Strong .  
+    ?wine vin:locatedIn vin:NewZealandRegion .  
+    ?wine vin:hasSugar vin:Dry 
+}
+
+
+
+# Without reasoning this will return empty result. This is because vin:adjacentRegion is symetric and there is only statement (vin:MendocinoRegion vin:adjacentRegion vin:SonomaRegion) in the KB.
+# With reasoning there are a number of rows as result.
+# If the places of ?region and vin:MendocinoRegion are switched no reasoning is needed. 
+
+SELECT *
+WHERE { 
+    ?wine vin:locatedIn ?region.
+    ?region vin:adjacentRegion vin:MendocinoRegion.
+    ?wine vin:hasSugar ?sugar.
+    FILTER NOT EXISTS {
+        ?wine vin:hasSugar vin:Sweet
+    }
+}
+
+
+
+# This is an example with grouping
+
+SELECT ?maker (count(distinct ?wine) as ?wineCount)
+WHERE {
+ 	?wine  vin:hasFlavor vin:Moderate.
+    FILTER NOT EXISTS {
+        ?wine vin:hasVintageYear ?year
+    }
+    ?wine vin:hasMaker ?maker
+}
+GROUP BY ?maker
+ORDER BY DESC(?wineCount)
+
+
+
+# Subquery example
+# Without reasoning it will return exact regions of the winery
+# With reasoning superclass regions will be added to the result
+
+SELECT DISTINCT ?maker ?region
+WHERE {
+	?wine vin:hasMaker ?maker.
+    ?wine vin:locatedIn ?region.
+     {
+        SELECT ?maker (count(distinct ?w) as ?wineCount)
+        WHERE { 
+            ?w vin:hasMaker ?maker.
+        }
+        GROUP BY ?maker
+        ORDER BY DESC(?wineCount)
+        LIMIT 3
+    }
+}
+
+
+
+#This is an example with UNION
+
+SELECT * 
+WHERE { 
+    {
+        ?w vin:hasMaker ?maker .
+    	FILTER(?maker IN (vin:WhitehallLane, vin:ChateauDeMeursault)).
+        ?w vin:hasFlavor ?f .  
+    }
+    UNION
+    {
+        ?w vin:hasColor vin:White.
+        ?w vin:hasMaker ?maker.
+        ?w vin:hasFlavor ?f .  
+    }
+}
+
+
+
+# This is an example with MINUS
+# Without reasoning the query returns empty result. 
+# The reason is that there are no medium wines that have direct region USRegion. 
+# All the regions of such wines are directly added in subregion of USRegion.
+
+SELECT DISTINCT ?wine
+WHERE { 
+    ?wine vin:locatedIn vin:USRegion.
+    ?wine vin:hasBody vin:Medium.
+    MINUS {
+        ?wine vin:locatedIn vin:NapaRegion.
+    }
+}
+
+
+
+# More than one filter and concept. Binding variable
+
+SELECT ?information
+WHERE {
+	?wine a ?wineType.
+    FILTER(?wineType in (vin:Zinfandel, vin:Merlot, vin:CabernetFranc, vin:Chardonnay, vin:CabernetSauvignon))
+    ?wine vin:hasFlavor ?flavor.
+    ?wine vin:hasBody ?body.
+    ?wine vin:hasSugar ?sugar.
+    ?wine vin:hasMaker ?maker.
+    FILTER NOT EXISTS { ?flavor vin:hasBody vin:Light }.
+    BIND(CONCAT(STR(?wine), " from winery ", STR(?maker), " has " , STR(?flavor), " and it is ", STR(?body), " and ", STR(?sugar)) as ?information)
+}
+
+
+
+# Bind with two filters
+
+SELECT ?commonSugarInfo
+{
+    {
+        SELECT distinct ?sugar (count(distinct ?wine) as ?wineCount)
+        WHERE {
+            ?wine vin:hasSugar ?sugar.
+            ?wine vin:locatedIn vin:USRegion.
+            ?wine vin:hasBody ?body.
+            FILTER (?body != vin:Full).
+            ?wine vin:hasFlavor ?flavor.
+            FILTER (?flavor in (vin:Strong, vin:Moderate))
+        }
+        GROUP BY ?sugar
+        ORDER BY DESC(?wineCount)
+        LIMIT 1
+    }
+    BIND(CONCAT("Most common wine sugar descipror for non-full body with strong or moderate taste in US is ", STR(?sugar)) as ?commonSugarInfo)
+}
+
+
+
+# Check wines with the flavour of the wines made from SauvignonBlancGrape that are not made from that grape filter SonomaRegion and light body as well
+# Again due to vin:locatedIn transitivity with reasoning more results are presented.
+
+SELECT ?wine ?body ?sugar ?region
+{
+    ?wine vin:hasFlavor ?flavor.
+    FILTER(?wine != ?sbgWine).
+    ?wine vin:hasBody ?body.
+    ?wine vin:hasSugar ?sugar.
+    ?wine vin:locatedIn ?region.
+    FILTER(?body != vin:Light).
+    FILTER (?region != vin:SonomaRegion)
+    {
+        SELECT ?sbgWine ?flavor
+        WHERE {
+            ?sbgWine vin:madeFromGrape vin:SauvignonBlancGrape.
+            ?sbgWine vin:hasFlavor ?flavor.
+        }
+    }
+}
+
+
+
+# FILTER New Zeland wines by body, flabor and maker
+
+SELECT DISTINCT *
+WHERE { 
+    ?wine vin:hasMaker ?maker .
+    ?wine vin:locatedIn vin:NewZealandRegion.
+    ?wine vin:hasFlavor ?flavor.
+    FILTER(?flavor IN (vin:Moderate, vin:Delicate) || ?maker = vin:Corbans).
+    ?wine vin:hasBody ?body.    
+    FILTER (?body = vin:Medium)
+}
